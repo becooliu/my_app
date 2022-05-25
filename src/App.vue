@@ -2,11 +2,11 @@
   <div id="main">
     <el-container>
       <el-aside v-if="getIsLogin">
-        <el-menu :default-openeds="['1']">
+        <el-menu router :default-openeds="['1']">
           <el-sub-menu index="1">
             <template #title><i class="el-icon-message"></i>房间</template>
             <el-menu-item-group>
-              <el-menu-item index="1-1">房间总览</el-menu-item>
+              <el-menu-item index="/user/home">房间总览</el-menu-item>
               <el-menu-item index="1-2">选项2</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="分组2">
@@ -38,9 +38,11 @@
             >
 
             <el-menu-item-group>
-              <template #title>分组一</template>
-              <el-menu-item index="3-1">选项1</el-menu-item>
-              <el-menu-item index="3-2">选项2</el-menu-item>
+              <el-menu-item index="3-1">帐号信息</el-menu-item>
+              <el-menu-item index="/reset">修改密码</el-menu-item>
+              <el-menu-item index="3-3" @click="logout()"
+                >退出登录</el-menu-item
+              >
             </el-menu-item-group>
             <el-menu-item-group title="分组2">
               <el-menu-item index="3-3">选项3</el-menu-item>
@@ -57,9 +59,6 @@
       </el-main>
     </el-container>
   </div>
-  <!-- <div id="nav">
-    <router-view></router-view>
-  </div> -->
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -77,18 +76,20 @@ import {
 } from "element-plus";
 //引入element-ui svg 图标
 //import { User } from "@element-plus/icons";
-import { getCookie } from "../utils";
+import { getCookie, setLogoutStorage, delCookie } from "../utils";
 
 export default defineComponent({
   name: "app",
   data() {
     return {
+      isLogin: false,
       username: getCookie("userCookie"),
       routerName: "首页",
     };
   },
   computed: {
     getIsLogin() {
+      //return this.$store.isLogin;
       return localStorage.getItem("userCookie");
       //this.$store.commit("setLoginStatus", localStorage.getItem("userCookie"));
     },
@@ -105,6 +106,15 @@ export default defineComponent({
     ElMenuItemGroup,
     //ElAvatar,
     //User,
+  },
+  methods: {
+    logout() {
+      //登出
+      setLogoutStorage("userCookie");
+      delCookie("userCookie");
+      this.$store.commit("setLogoutStatus");
+      this.$router.push({ name: "Login" });
+    },
   },
 });
 </script>

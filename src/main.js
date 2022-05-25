@@ -19,6 +19,7 @@ app.use(ElInput)
 
 router.beforeEach((to, from, next) => {
     if (to.path === '/login' || to.path === '/register' || to.path === '/reset') {
+        console.log('login or reset');
         next()
     } else {
         if (!getCookie('userCookie')) {
