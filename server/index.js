@@ -1,7 +1,8 @@
 const express = require('express')
 const app = express()
 
-const api = require('./api')
+const userApi = require('./api/user_api')
+
 
 const path = require('path')
 const fs = require('fs')
@@ -9,7 +10,7 @@ const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
-app.use(api)
+app.use(userApi)
 
 //允许跨域访问
 app.use("*", function (req, res, next) {

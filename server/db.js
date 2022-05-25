@@ -8,11 +8,21 @@ db.once('open', () => console.log('MongoDB Connect Success.'))
 
 const userSchema = mongoose.Schema({
     username: String,
-    password: String
+    password: String,
+    password2: String
+})
+
+const roomSchema = mongoose.Schema({
+    room_number: Number,
+    room_level: String,
+    room_type: String,
+    room_price: Number,
+    room_status: Number
 })
 
 const Models = {
-    user: mongoose.model("users", userSchema)
+    user: mongoose.model("users", userSchema),
+    room: mongoose.model('rooms', roomSchema)
 }
 
 module.exports = Models

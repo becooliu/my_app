@@ -18,7 +18,7 @@ app.use(ElFormItem)
 app.use(ElInput)
 
 router.beforeEach((to, from, next) => {
-    if (to.path === '/login' || to.path === '/register') {
+    if (to.path === '/login' || to.path === '/register' || to.path === '/reset') {
         next()
     } else {
         if (!getCookie('userCookie')) {

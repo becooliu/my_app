@@ -1,9 +1,22 @@
-//设置cookie,增加到vue实例方便全局调用
+import md5 from 'js-md5'
+//md5 加密密码并翻转
+function md5Pass(password) {
+    return md5(password.toString()).split('').reverse().join('')
+}
+
+//判断是否登录，持久化
+function isLogin() {
+    return localStorage.getItem("userCookie");
+}
+
 //vue全局调用的理由是，有些组件所用到的接口可能需要session验证，session从cookie获取
 //如果session保存到vuex的话除外
+
+//设置cookie
 function setCookie(cookieName, cookieValue, expireDays) {
-    var exdate = new Date();
-    exdate.setDate(exdate.getDate() + expireDays);
+    expireDays = Number(expireDays) ? Number(expireDays) : 1
+    let exdate = new Date()
+    exdate.setDate(exdate.getDate() + expireDays)
     document.cookie = cookieName + "=" + escape(cookieValue) +
         ((expireDays == null) ? 1 : ";path=/; expires=" + exdate.toGMTString())
 }
@@ -40,9 +53,11 @@ function setLogoutStorage(key) {
 }
 
 export {
+    md5Pass,
     setCookie,
     getCookie,
     delCookie,
     setLoginStorage,
-    setLogoutStorage
+    setLogoutStorage,
+    isLogin
 }

@@ -1,10 +1,9 @@
-
 <template>
   <el-menu
     :default-active="activeIndex"
     class="el-menu-demo"
     mode="horizontal"
-    @select="handleSelect"
+    router
   >
     <el-menu-item index="1">处理中心</el-menu-item>
     <el-sub-menu index="2">
@@ -20,10 +19,14 @@
       </el-sub-menu>
     </el-sub-menu>
     <el-menu-item index="3" disabled>消息中心</el-menu-item>
-    <el-sub-menu index="4" style="float: right">
-      <template #title>我的</template>
+    <el-sub-menu
+      index="4"
+      v-if="getIsLogin"
+      style="position: absolute; right: 15px"
+    >
+      <template #title>{{ userName }}</template>
       <el-menu-item index="4-1">帐号信息</el-menu-item>
-      <el-menu-item index="4-2">修改密码</el-menu-item>
+      <el-menu-item index="/reset">修改密码</el-menu-item>
       <el-menu-item index="4-3" @click="logout()">登出</el-menu-item>
     </el-sub-menu>
   </el-menu>
@@ -31,31 +34,34 @@
 
 <script>
 import { ElMenu, ElMenuItem, ElSubMenu } from "element-plus";
-import { setLogoutStorage, delCookie } from "../../../utils/index";
+import { setLogoutStorage, delCookie, getCookie } from "../../../utils/index";
 
 export default {
   name: "Home",
   data() {
     return {
+      userName: getCookie("userCookie"),
       activeIndex: "1",
-      activeIndex2: "1"
+      activeIndex2: "1",
     };
   },
   components: { ElMenu, ElMenuItem, ElSubMenu },
-  methods: {
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath);
+  computed: {
+    getIsLogin() {
+      return localStorage.getItem("userCookie");
+      //this.$store.commit("setLoginStatus", localStorage.getItem("userCookie"));
     },
+  },
+  methods: {
     logout() {
       //登出
       setLogoutStorage("userCookie");
       delCookie("userCookie");
       this.$store.commit("setLogoutStatus");
       this.$router.push({ name: "Login" });
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style>
-</style>
+<style></style>

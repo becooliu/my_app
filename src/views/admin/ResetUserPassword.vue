@@ -1,5 +1,5 @@
 <template>
-  <Title title="用户注册" class="margin-t-3"></Title>
+  <Title title="重置用户密码" class="margin-t-3"></Title>
   <el-container class="jf_c margin-t-2">
     <el-form
       :model="ruleForm"
@@ -17,7 +17,7 @@
         ></el-input>
       </el-form-item>
 
-      <el-form-item label="密码" prop="password">
+      <el-form-item label="新密码" prop="password">
         <el-input
           type="password"
           v-model="ruleForm.password"
@@ -25,7 +25,7 @@
         ></el-input>
       </el-form-item>
 
-      <el-form-item label="密码" prop="password2">
+      <el-form-item label="确认新密码" prop="password2">
         <el-input
           type="password"
           v-model="ruleForm.password2"
@@ -39,7 +39,7 @@
         <el-button @click="resetForm('ruleForm')">重置</el-button>
       </el-form-item>
       <el-form-item>
-        <el-link type="default" :href="`/#/login`" style="margin-left: 2em"
+        <el-link type="primary" @click="goToLogin()"
           >已有帐号？立即登录</el-link
         >
       </el-form-item>
@@ -100,11 +100,12 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          //对密码进入md5 加密并翻转
+          //加密所有密码
           this.ruleForm.password = md5Pass(this.ruleForm.password);
           this.ruleForm.password2 = md5Pass(this.ruleForm.password2);
+
           axios
-            .post("/api/user/Register", this.ruleForm, {
+            .post("/api/user/Reset", this.ruleForm, {
               emulateJSON: true,
             })
             .then((res) => {
@@ -150,6 +151,12 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
+    },
+    goToLogin() {
+      this.$router.push({ name: "Login" });
+    },
+    goToRegist() {
+      this.$router.push({ name: "Register" });
     },
   },
   components: {

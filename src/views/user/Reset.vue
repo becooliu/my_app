@@ -1,5 +1,5 @@
 <template>
-  <Title title="用户注册" class="margin-t-3"></Title>
+  <Title title="修改密码" class="margin-t-3"></Title>
   <el-container class="jf_c margin-t-2">
     <el-form
       :model="ruleForm"
@@ -17,7 +17,14 @@
         ></el-input>
       </el-form-item>
 
-      <el-form-item label="密码" prop="password">
+      <el-form-item label="旧密码" prop="old_password">
+        <el-input
+          type="password"
+          v-model="ruleForm.old_password"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="新密码" prop="password">
         <el-input
           type="password"
           v-model="ruleForm.password"
@@ -25,7 +32,7 @@
         ></el-input>
       </el-form-item>
 
-      <el-form-item label="密码" prop="password2">
+      <el-form-item label="确认新密码" prop="password2">
         <el-input
           type="password"
           v-model="ruleForm.password2"
@@ -39,8 +46,11 @@
         <el-button @click="resetForm('ruleForm')">重置</el-button>
       </el-form-item>
       <el-form-item>
-        <el-link type="default" :href="`/#/login`" style="margin-left: 2em"
+        <el-link type="primary" @click="goToLogin()"
           >已有帐号？立即登录</el-link
+        >
+        <el-link type="default" @click="goToRegist()" style="margin-left: 2em"
+          >没有帐号？</el-link
         >
       </el-form-item>
     </el-form>
@@ -64,6 +74,15 @@ export default {
       }
     };
 
+    let checkOldPassword = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error("旧密码不能为空"));
+      }
+      if (value.length < 6) {
+        return callback(new Error("旧密码长度不能小于6位"));
+      }
+      callback();
+    };
     let checkPassword = (rule, value, callback) => {
       if (!value) {
         return callback(new Error("密码不能为空"));
@@ -91,6 +110,7 @@ export default {
       },
       rules: {
         username: [{ validator: checkUsername, trigger: "blur" }],
+        old_password: [{ validator: checkOldPassword, trigger: "blur" }],
         password: [{ validator: checkPassword, trigger: "blur" }],
         password2: [{ validator: validatePass2, trigger: "blur" }],
       },
@@ -100,11 +120,13 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          //对密码进入md5 加密并翻转
+          //加密所有密码
+          this.ruleForm.old_password = md5Pass(this.ruleForm.old_password);
           this.ruleForm.password = md5Pass(this.ruleForm.password);
           this.ruleForm.password2 = md5Pass(this.ruleForm.password2);
+
           axios
-            .post("/api/user/Register", this.ruleForm, {
+            .post("/api/user/Reset", this.ruleForm, {
               emulateJSON: true,
             })
             .then((res) => {
@@ -150,6 +172,12 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
+    },
+    goToLogin() {
+      this.$router.push({ name: "Login" });
+    },
+    goToRegist() {
+      this.$router.push({ name: "Register" });
     },
   },
   components: {

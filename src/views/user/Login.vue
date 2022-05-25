@@ -7,7 +7,7 @@
       :rules="rules"
       ref="ruleForm"
       label-width="100px"
-      class="demo-ruleForm"
+      class="user_form"
     >
       <el-form-item label="用户名" prop="username">
         <el-input
@@ -31,6 +31,14 @@
         >
         <el-button @click="resetForm('ruleForm')">重置</el-button>
       </el-form-item>
+      <el-form-item>
+        <el-link type="default" :href="`/#/register`"
+          >没有帐号？立即注册</el-link
+        >
+        <el-link type="default" :href="`/#/reset`" style="margin-left: 2em"
+          >忘记密码？</el-link
+        >
+      </el-form-item>
     </el-form>
   </el-container>
 </template>
@@ -38,8 +46,8 @@
 <script>
 import Title from "../../components/Title.vue";
 import axios from "axios";
-import { ElMessage } from "element-plus";
-import { setCookie, setLoginStorage } from "../../../utils/index";
+import { ElMessage, ElLink } from "element-plus";
+import { setCookie, setLoginStorage, md5Pass } from "../../../utils/index";
 
 export default {
   name: "Regist",
@@ -59,7 +67,9 @@ export default {
         return callback(new Error("密码不能为空"));
       }
       if (value.length < 6) {
-        return callback(new Error("密码长度不能小于6位"));
+        if (this.ruleForm.username !== "admin") {
+          return callback(new Error("密码长度不能小于6位"));
+        }
       }
       callback();
     };
@@ -67,33 +77,41 @@ export default {
     return {
       ruleForm: {
         username: "",
-        password: ""
+        password: "",
       },
       rules: {
         username: [{ validator: checkUsername, trigger: "blur" }],
-        password: [{ validator: checkPassword, trigger: "blur" }]
-      }
+        password: [{ validator: checkPassword, trigger: "blur" }],
+      },
     };
   },
   methods: {
     submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+      this.$refs[formName].validate((valid) => {
         if (valid) {
+          this.ruleForm.password = md5Pass(this.ruleForm.password);
           axios
             .post("/api/Admin/Login", this.ruleForm, {
-              emulateJSON: true
+              emulateJSON: true,
             })
-            .then(res => {
+            .then((res) => {
               if (res.data.code == "200") {
                 ElMessage({
                   type: "success",
-                  message: res.data.message
+                  message: res.data.message,
                 });
                 setLoginStorage("userCookie", this.ruleForm.username); //localStorage 存储登录信息
                 setCookie("userCookie", this.ruleForm.username, 1);
+                this.$store.commit("setLoginStatus", true);
                 setTimeout(() => {
                   this.$router.push({ name: "Home" });
                 }, 3000);
+              } else {
+                ElMessage({
+                  type: "error",
+                  message: res.data.message,
+                });
+                return;
               }
             });
         } else {
@@ -104,11 +122,12 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
-    }
+    },
   },
   components: {
-    Title
-  }
+    Title,
+    ElLink,
+  },
 };
 </script>
 <style scoped>

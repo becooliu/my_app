@@ -1,13 +1,12 @@
 <template>
   <div id="main">
     <el-container>
-      <el-aside v-if="this.$store.state.isLogin">
-        <el-menu :default-openeds="['1', '3']">
+      <el-aside v-if="getIsLogin">
+        <el-menu :default-openeds="['1']">
           <el-sub-menu index="1">
-            <template #title><i class="el-icon-message"></i>导航一</template>
+            <template #title><i class="el-icon-message"></i>房间</template>
             <el-menu-item-group>
-              <template #title>分组一</template>
-              <el-menu-item index="1-1">选项1</el-menu-item>
+              <el-menu-item index="1-1">房间总览</el-menu-item>
               <el-menu-item index="1-2">选项2</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="分组2">
@@ -34,7 +33,10 @@
             </el-sub-menu>
           </el-sub-menu>
           <el-sub-menu index="3">
-            <template #title><i class="el-icon-setting"></i>导航三</template>
+            <template #title
+              ><el-icon class="menu-item-icon"><user /></el-icon>我的</template
+            >
+
             <el-menu-item-group>
               <template #title>分组一</template>
               <el-menu-item index="3-1">选项1</el-menu-item>
@@ -51,23 +53,6 @@
         </el-menu>
       </el-aside>
       <el-main>
-        <el-container>
-          <el-row style="width: 100%" v-if="this.$store.state.isLogin">
-            <!-- <el-col :span="12">
-              <div class="grid-content bg-purple-dark">
-                当前位置:{{ routerName }}
-              </div>
-            </el-col> -->
-            <el-col :span="24">
-              <div class="user-login">
-                <el-avatar
-                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                ></el-avatar>
-                <div style="text-align: right">{{ username }}</div>
-              </div>
-            </el-col>
-          </el-row>
-        </el-container>
         <router-view></router-view>
       </el-main>
     </el-container>
@@ -82,14 +67,16 @@ import {
   ElContainer,
   ElAside,
   ElMain,
-  ElRow,
-  ElCol,
+  //ElRow,
+  //ElCol,
   ElMenu,
   ElSubMenu,
   ElMenuItem,
   ElMenuItemGroup,
-  ElAvatar
+  //ElAvatar,
 } from "element-plus";
+//引入element-ui svg 图标
+//import { User } from "@element-plus/icons";
 import { getCookie } from "../utils";
 
 export default defineComponent({
@@ -97,28 +84,49 @@ export default defineComponent({
   data() {
     return {
       username: getCookie("userCookie"),
-      routerName: "首页"
+      routerName: "首页",
     };
+  },
+  computed: {
+    getIsLogin() {
+      return localStorage.getItem("userCookie");
+      //this.$store.commit("setLoginStatus", localStorage.getItem("userCookie"));
+    },
   },
   components: {
     ElContainer,
     ElAside,
     ElMain,
-    ElRow,
-    ElCol,
+    //ElRow,
+    //ElCol,
     ElMenu,
     ElSubMenu,
     ElMenuItem,
     ElMenuItemGroup,
-    ElAvatar
-  }
+    //ElAvatar,
+    //User,
+  },
 });
 </script>
 
-<style scoped>
+<style>
+.menu-item-icon {
+  display: inline-block;
+  font-size: 1em;
+  width: 24px;
+  margin-right: 5px;
+  line-height: 0px;
+  overflow: hidden;
+}
 .user-login {
   display: flex;
   align-items: flex-end;
   justify-content: right;
+}
+.user_form {
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 1.5rem;
+  background: #fafafa;
 }
 </style>
