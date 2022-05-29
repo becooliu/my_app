@@ -6,7 +6,7 @@ function md5Pass(password) {
 
 //判断是否登录，持久化
 function isLogin() {
-    return localStorage.getItem("userCookie");
+    return localStorage.getItem("userCookie") && getCookie('userCookie').length;
 }
 
 //vue全局调用的理由是，有些组件所用到的接口可能需要session验证，session从cookie获取

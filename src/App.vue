@@ -90,7 +90,8 @@ export default defineComponent({
   computed: {
     getIsLogin() {
       //return this.$store.isLogin;
-      return localStorage.getItem("userCookie");
+      return getCookie("userCookie");
+      //return localStorage.getItem("userCookie");
       //this.$store.commit("setLoginStatus", localStorage.getItem("userCookie"));
     },
   },
