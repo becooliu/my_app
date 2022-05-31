@@ -57,14 +57,23 @@
   </div>
   <!--添加房间dialog -->
   <el-dialog v-model="addRoomDialogVisible" title="添加客房">
-    <el-form :model="new_room" :size="defalut">
-      <el-form-item label="房间号" :label-width="formLabelWidth">
+    <el-form
+      :model="new_room"
+      :rules="new_room_rules"
+      ref="new_room"
+      :size="small"
+    >
+      <el-form-item
+        label="房间号"
+        prop="room_number"
+        :label-width="formLabelWidth"
+      >
         <el-input v-model="new_room.room_number" autocomplete="off" />
       </el-form-item>
       <el-form-item label="房间级别" :label-width="formLabelWidth">
         <el-select v-model="new_room.room_level" placeholder="请选择房间级别">
-          <el-option value="1" label="总统套房" />
-          <el-option value="2" label="豪华套房" />
+          <el-option value="1=总统套房" label="总统套房" />
+          <el-option value="2=豪华套房" label="豪华套房" />
           <el-option value="3" label="标准套房" />
           <el-option value="4" label="标准双人房" />
           <el-option value="5" label="标准单间" />
@@ -72,13 +81,18 @@
           <el-option value="7" label="钟点房" />
         </el-select>
       </el-form-item>
+      <el-form-item
+        label="价格"
+        prop="room_price"
+        :label-width="formLabelWidth"
+      >
+        <el-input v-model="new_room.room_price" autocomplete="off" />
+      </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"
-          >Confirm</el-button
-        >
+        <el-button @click="addRoomDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="addNewRoom">确认添加房间</el-button>
       </span>
     </template>
   </el-dialog>
@@ -98,7 +112,6 @@ import axios from "axios";
 
 //添加房间
 import { reactive, ref } from "vue";
-
 const add_room = reactive({
   room_number: "",
   room_level: "",
@@ -110,11 +123,36 @@ const add_room = reactive({
 export default {
   name: "User_Home",
   data() {
+    //校验新增房间号
+    let checkRoomNumber = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error("房间号不能为空"));
+      }
+      if (!Number(value)) {
+        return callback(new Error("房间号只能是数字"));
+      }
+      callback();
+    };
+
+    //校验新增房间价格
+    let checkRoomPrice = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error("房间价格不能为空"));
+      }
+      if (!Number(value)) {
+        return callback(new Error("房间价格只能是数字"));
+      }
+      callback();
+    };
     return {
       roomData: null,
       addRoomDialogVisible: ref(false),
-      new_room: add_room,
       formLabelWidth: "140px",
+      new_room: add_room,
+      new_room_rules: {
+        room_number: [{ validator: checkRoomNumber, trigger: "blur" }],
+        room_price: [{ validator: checkRoomPrice, trigger: "blur" }],
+      },
     };
   },
   created() {
@@ -134,7 +172,7 @@ export default {
   },
   computed: {},
   methods: {
-    addRoom() {},
+    addNewRoom() {},
   },
 };
 </script>
