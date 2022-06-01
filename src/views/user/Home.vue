@@ -8,7 +8,7 @@
       <el-table-column prop="room_price" label="房间价格" />
       <el-table-column prop="room_status" label="房间状态">
         <template #default="scope">
-          <span>{{
+          <span :index="scope.row.room_status">{{
             scope.row.room_status == 1
               ? "预订未入住"
               : scope.row.room_status == 2
@@ -20,21 +20,22 @@
       <el-table-column label="操作">
         <template #default="scope">
           <el-button
-            v-if="scope.row.room_status == (1 || 2)"
+            :index="scope.row.room_status"
+            v-if="scope.row.room_status == 1 || scope.row.room_status == 2"
             size="small"
-            @click="handleEdit(scope.$index, scope.row)"
+            @click="checkIn(scope.$index, scope.row)"
             >办理入住</el-button
           >
           <el-button
-            v-if="scope.row.room_status != (1 || 2)"
+            v-else
             size="small"
-            @click="handleEdit(scope.$index, scope.row)"
+            @click="checkOut(scope.$index, scope.row)"
             >办理退房</el-button
           >
           <el-button
             size="small"
             type="danger"
-            @click="handleDelete(scope.$index, scope.row)"
+            @click="removeRoom(scope.$index, scope.row)"
             >删除</el-button
           >
         </template>
@@ -50,7 +51,7 @@
     />
 
     <br />
-    <el-button type="primary" @click="addCheckIn">办理入住</el-button>
+    <el-button type="primary">办理入住</el-button>
     <el-button type="info" @click="addRoomDialogVisible = true"
       >添加房间</el-button
     >
@@ -74,11 +75,11 @@
         <el-select v-model="new_room.room_level" placeholder="请选择房间级别">
           <el-option value="1=总统套房" label="总统套房" />
           <el-option value="2=豪华套房" label="豪华套房" />
-          <el-option value="3" label="标准套房" />
-          <el-option value="4" label="标准双人房" />
-          <el-option value="5" label="标准单间" />
-          <el-option value="6" label="棋牌房" />
-          <el-option value="7" label="钟点房" />
+          <el-option value="3=标准套房" label="标准套房" />
+          <el-option value="4=标准双人房" label="标准双人房" />
+          <el-option value="5=标准单间" label="标准单间" />
+          <el-option value="6=棋牌房" label="棋牌房" />
+          <el-option value="7=钟点房" label="钟点房" />
         </el-select>
       </el-form-item>
       <el-form-item
@@ -92,7 +93,53 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="addRoomDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="addNewRoom">确认添加房间</el-button>
+        <el-button type="primary" @click="addNewRoom('new_room')"
+          >确认添加房间</el-button
+        >
+      </span>
+    </template>
+  </el-dialog>
+
+  <!--办理入住-->
+  <el-dialog v-model="checkInDialogVisible" title="办理入住">
+    <el-form
+      :model="checkInData"
+      :rules="new_room_rules"
+      ref="checkIn_room"
+      :size="small"
+    >
+      <el-form-item
+        label="房间号"
+        prop="room_number"
+        :label-width="formLabelWidth"
+      >
+        <el-input v-model="checkInData.room_number" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="房间级别" :label-width="formLabelWidth">
+        <el-select v-model="checkInData.room_type" placeholder="请选择房间级别">
+          <el-option value="1=总统套房" label="总统套房" />
+          <el-option value="2=豪华套房" label="豪华套房" />
+          <el-option value="3=标准套房" label="标准套房" />
+          <el-option value="4=标准双人房" label="标准双人房" />
+          <el-option value="5=标准单间" label="标准单间" />
+          <el-option value="6=棋牌房" label="棋牌房" />
+          <el-option value="7=钟点房" label="钟点房" />
+        </el-select>
+      </el-form-item>
+      <el-form-item
+        label="价格"
+        prop="room_price"
+        :label-width="formLabelWidth"
+      >
+        <el-input v-model="checkInData.room_price" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="addRoomDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="addNewRoom('new_room')"
+          >确认添加房间</el-button
+        >
       </span>
     </template>
   </el-dialog>
@@ -106,6 +153,7 @@ import {
   ElDialog,
   ElSelect,
   ElOption,
+  ElMessage,
 } from "element-plus";
 import Title from "../../components/Title.vue";
 import axios from "axios";
@@ -125,7 +173,7 @@ export default {
   data() {
     //校验新增房间号
     let checkRoomNumber = (rule, value, callback) => {
-      if (!value) {
+      if (!value || !Number(value)) {
         return callback(new Error("房间号不能为空"));
       }
       if (!Number(value)) {
@@ -147,6 +195,8 @@ export default {
     return {
       roomData: null,
       addRoomDialogVisible: ref(false),
+      checkInDialogVisible: ref(false),
+      checkInData: null,
       formLabelWidth: "140px",
       new_room: add_room,
       new_room_rules: {
@@ -156,6 +206,7 @@ export default {
     };
   },
   created() {
+    //获取房间信息
     axios.get("/api/rooms").then((res) => {
       console.log(res.data);
       this.roomData = res.data;
@@ -172,7 +223,29 @@ export default {
   },
   computed: {},
   methods: {
-    addNewRoom() {},
+    addNewRoom(form) {
+      this.$refs[form].validate((valid) => {
+        if (valid) {
+          //console.log(this.new_room);
+          axios.post("/api/rooms/add", this.new_room).then((res) => {
+            ElMessage({
+              type: "success",
+              message: res.data.message,
+            });
+          });
+        } else {
+          ElMessage({
+            type: "error",
+            message: "非法的数据，请检查。",
+          });
+        }
+      });
+    },
+    checkIn(index, row) {
+      this.checkInDialogVisible = true;
+      console.log(index, row);
+      this.checkInData = row;
+    },
   },
 };
 </script>
