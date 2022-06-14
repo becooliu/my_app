@@ -52,6 +52,23 @@ function setLogoutStorage(key) {
     localStorage.removeItem(key)
 }
 
+//验证身份证号码
+function isID(value) {
+    let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(x|X|\d)$)/
+    return reg.test(value)
+}
+
+//验证邮箱
+function isEmail(value) {
+    const reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/
+    return reg.test(value)
+}
+//验证电话号码
+function isPhone(value) {
+    const reg = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/
+    return reg.test(value)
+}
+
 export {
     md5Pass,
     setCookie,
@@ -59,5 +76,8 @@ export {
     delCookie,
     setLoginStorage,
     setLogoutStorage,
-    isLogin
+    isLogin,
+    isID,
+    isEmail,
+    isPhone
 }

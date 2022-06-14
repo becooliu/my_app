@@ -72,10 +72,11 @@ import {
   ElSubMenu,
   ElMenuItem,
   ElMenuItemGroup,
+  ElIcon,
   //ElAvatar,
 } from "element-plus";
 //引入element-ui svg 图标
-//import { User } from "@element-plus/icons";
+import { User } from "@element-plus/icons";
 import { getCookie, setLogoutStorage, delCookie } from "../utils";
 
 export default defineComponent({
@@ -106,7 +107,8 @@ export default defineComponent({
     ElMenuItem,
     ElMenuItemGroup,
     //ElAvatar,
-    //User,
+    ElIcon,
+    User,
   },
   methods: {
     logout() {
