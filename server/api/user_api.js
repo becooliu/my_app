@@ -31,10 +31,10 @@ router.post('/api/Admin/Login', (req, res) => {
             responseData.code = '4'
             responseData.message = '帐号不存在，请确认。'
         }
-        //res.json(responseData)
+        res.json(responseData)
     })
 
-    res.json(responseData)
+    //res.json(responseData)
 })
 
 //user register

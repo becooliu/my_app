@@ -151,6 +151,21 @@
           autocomplete="off"
         />
       </el-form-item>
+      <el-form-item
+        label="入住日期"
+        prop="customer_checkin_date"
+        :label-width="formLabelWidth"
+      >
+        <el-date-picker
+          v-model="initCheckInData.customer_checkin_date"
+          type="datetime"
+          placeholder="选择入住日期时间"
+        />
+        <!-- <el-input
+          v-model="initCheckInData.customer_checkin_date"
+          autocomplete="off"
+        /> -->
+      </el-form-item>
       <el-form-item label="备注" prop="comment" :label-width="formLabelWidth">
         <el-input v-model="initCheckInData.comment" autocomplete="off" />
       </el-form-item>
@@ -160,7 +175,10 @@
         <el-button @click="addRoomDialogVisible = false" size="small"
           >取消</el-button
         >
-        <el-button type="primary" @click="confirmCheckIn()" size="small"
+        <el-button
+          type="primary"
+          @click="confirmCheckIn('checkIn_room')"
+          size="small"
           >确认入住</el-button
         >
       </span>
@@ -177,6 +195,7 @@ import {
   ElSelect,
   ElOption,
   ElMessage,
+  ElDatePicker,
 } from "element-plus";
 import Title from "../../components/Title.vue";
 import axios from "axios";
@@ -197,6 +216,7 @@ const initCheckInData = reactive({
   customer_name: "",
   customer_ID: "",
   customer_phone_number: "",
+  customer_checkin_date: new Date(),
   comment: "None",
 });
 
@@ -289,6 +309,7 @@ export default {
     ElDialog,
     ElSelect,
     ElOption,
+    ElDatePicker,
   },
   computed: {},
   methods: {
@@ -316,9 +337,42 @@ export default {
       console.log(index, row);
       this.checkInData = row;
     },
-    confirmCheckIn() {
+    confirmCheckIn(form) {
       let postData = { ...this.checkInData, ...this.initCheckInData };
       console.log(postData);
+      this.$refs[form].validate((valid) => {
+        if (!valid) {
+          ElMessage({
+            type: "error",
+            message: "非法的数据，请检查",
+          });
+          return;
+        }
+      });
+
+      console.log(121, this.$refs);
+
+      this.$refs["checkIn_custom_info"].validate((valid) => {
+        if (!valid) {
+          ElMessage({
+            type: "error",
+            message: "非法的数据，请检查",
+          });
+        } else {
+          axios
+            .post("/api/rooms/checkin", postData)
+            .then((res) => {
+              console.log(res.data.status);
+              ElMessage({
+                type: "success",
+                message: res.data.message,
+              });
+            })
+            .catch((err) => {
+              throw new Error(err);
+            });
+        }
+      });
     },
   },
 };
